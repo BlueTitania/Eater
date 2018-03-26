@@ -1,0 +1,64 @@
+function add_food( ... )--создание еды
+	local num = math.random(-2,4);
+	local item=display.newImageRect(skin_path..num..'.png',2*ALL,2*ALL);
+	local x,y;
+	local f = true;
+	while(f)do
+		f=false;
+		x=math.random(ALL,W-ALL);
+		y=math.random(ALL+TOP,H-ALL);
+		
+		for i=1,#food do
+			if(get_dd(x,y,food[i].x,food[i].y)<2*ALL)then
+				f=true;
+			end;
+		end;
+
+		if(get_dd(x,y,hero.x,hero.y)<ALL+H_D/2)then
+				f=true;
+		end;
+	end;
+	item.x=x;
+	item.y=y;
+	item.t=math.random(TIME,5*TIME);
+	if(num<0)then
+		item.dmg=num;
+	else
+		item.dmg=0;
+	end;
+
+	table.insert( food, item);
+end
+
+function move(...)--движения
+	if(f_play) then	
+		timer=timer-1;
+		local dx = -(hero.x-touch_x);
+		local dy = -(hero.y-touch_y);	
+		local dd = math.sqrt(dx*dx+dy*dy);
+		local vx = dx/dd*speed;
+		local vy = dy/dd*speed;
+		if(dd>speed)then
+			hero.x=hero.x+vx;
+			hero.y=hero.y+vy;
+			distans=distans+1;
+		end;
+		if(#food<MAX_FOOD)then add_food();end;
+		local fo=nil ;
+		for i=1,#food do
+			food[i].t=food[i].t-1;
+			if((get_dd(hero.x,hero.y,food[i].x,food[i].y)<ALL+H_D/2)or(food[i].t==0))then
+				if(food[i].t>0)then 
+					score=score+1; 
+					hp=hp+food[i].dmg; 
+					print("hp:",hp);
+					timer=8*TIME;
+				end;
+				fo=food[i];
+				fo:removeSelf();
+				table.remove(food,i);
+				return;
+			end;
+		end
+	end;
+end;
